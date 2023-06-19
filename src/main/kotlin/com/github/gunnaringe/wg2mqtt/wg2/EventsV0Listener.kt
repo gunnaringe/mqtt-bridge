@@ -1,6 +1,12 @@
 package com.github.gunnaringe.wg2mqtt.wg2
 
 import com.github.gunnaringe.wg2mqtt.Events
+import com.github.gunnaringe.wg2mqtt.model.Call
+import com.github.gunnaringe.wg2mqtt.model.CallEnvelope
+import com.github.gunnaringe.wg2mqtt.model.Event
+import com.github.gunnaringe.wg2mqtt.model.Metadata
+import com.github.gunnaringe.wg2mqtt.model.Sms
+import com.github.gunnaringe.wg2mqtt.model.SmsEnvelope
 import com.github.gunnaringe.wg2mqtt.toInstant
 import com.google.protobuf.Duration
 import com.google.protobuf.empty
@@ -17,12 +23,6 @@ import com.wgtwo.api.v0.events.EventsServiceGrpc
 import com.wgtwo.auth.ClientCredentialSource
 import io.grpc.Channel
 import io.grpc.Context
-import com.github.gunnaringe.wg2mqtt.model.Call
-import com.github.gunnaringe.wg2mqtt.model.CallEnvelope
-import com.github.gunnaringe.wg2mqtt.model.Event
-import com.github.gunnaringe.wg2mqtt.model.Metadata
-import com.github.gunnaringe.wg2mqtt.model.Sms
-import com.github.gunnaringe.wg2mqtt.model.SmsEnvelope
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.util.concurrent.Executors

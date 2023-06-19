@@ -1,6 +1,9 @@
 package com.github.gunnaringe.wg2mqtt.wg2
 
 import com.github.gunnaringe.wg2mqtt.Events
+import com.github.gunnaringe.wg2mqtt.model.Consent
+import com.github.gunnaringe.wg2mqtt.model.ConsentEnvelope
+import com.github.gunnaringe.wg2mqtt.model.Metadata
 import com.github.gunnaringe.wg2mqtt.toInstant
 import com.google.protobuf.empty
 import com.wgtwo.api.v1.consent.ConsentEventServiceGrpc
@@ -13,9 +16,6 @@ import com.wgtwo.api.v1.events.EventsProto.StreamConfiguration
 import com.wgtwo.auth.ClientCredentialSource
 import io.grpc.Channel
 import io.grpc.Context
-import com.github.gunnaringe.wg2mqtt.model.Consent
-import com.github.gunnaringe.wg2mqtt.model.ConsentEnvelope
-import com.github.gunnaringe.wg2mqtt.model.Metadata
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.util.concurrent.Executors

@@ -5,7 +5,7 @@ import mqtt.packets.Qos
 import org.slf4j.LoggerFactory
 
 class MqttServer(wsPort: Int, auth: MqttAuthenticator, messageHandler: MqttMessages) {
-     val broker = Broker(
+    val broker = Broker(
         enhancedAuthenticationProviders = mapOf(),
         authentication = auth,
         authorization = auth,

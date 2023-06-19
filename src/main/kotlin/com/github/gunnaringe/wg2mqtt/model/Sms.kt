@@ -22,4 +22,3 @@ data class Call(
     val action: String,
     val hiddenCaller: Boolean,
 )
-

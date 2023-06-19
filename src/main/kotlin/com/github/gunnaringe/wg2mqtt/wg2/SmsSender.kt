@@ -1,12 +1,12 @@
 package com.github.gunnaringe.wg2mqtt.wg2
 
 import com.github.gunnaringe.wg2mqtt.Events
+import com.github.gunnaringe.wg2mqtt.model.SmsEnvelope
 import com.google.common.eventbus.Subscribe
 import com.wgtwo.api.v1.sms.SmsProto.SendTextFromSubscriberRequest
 import com.wgtwo.api.v1.sms.SmsServiceGrpc
 import com.wgtwo.auth.ClientCredentialSource
 import io.grpc.Channel
-import com.github.gunnaringe.wg2mqtt.model.SmsEnvelope
 import org.slf4j.LoggerFactory
 
 class SmsSender(private val channel: Channel, private val tokenSource: ClientCredentialSource) {
