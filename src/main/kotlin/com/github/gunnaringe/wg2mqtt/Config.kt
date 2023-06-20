@@ -20,6 +20,7 @@ data class MqttConfig(
 
 data class MqttPortConfig(
     val ws: Int,
+    val mqtt: Int,
 )
 
 data class User(

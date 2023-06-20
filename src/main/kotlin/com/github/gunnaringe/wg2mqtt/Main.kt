@@ -59,6 +59,7 @@ fun main(args: Array<String>) {
     val mqttMessageHandler = MqttMessages()
     val mqttServer = MqttServer(
         wsPort = config.mqtt.ports.ws,
+        mqttPort = config.mqtt.ports.mqtt,
         auth = mqttAuth,
         messageHandler = mqttMessageHandler,
     )

@@ -74,7 +74,8 @@ wg2:
   eventQueue: "wg2mqtt"
 mqtt:
   ports:
-    ws: 9999
+    ws: 9001
+    mqtt: 1883
 users:
   - phone: "${PHONE}"
     password: "${PASSWORD}"

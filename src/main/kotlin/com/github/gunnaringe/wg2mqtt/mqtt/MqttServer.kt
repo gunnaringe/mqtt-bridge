@@ -4,14 +4,14 @@ import mqtt.broker.Broker
 import mqtt.packets.Qos
 import org.slf4j.LoggerFactory
 
-class MqttServer(wsPort: Int, auth: MqttAuthenticator, messageHandler: MqttMessages) {
-    val broker = Broker(
+class MqttServer(wsPort: Int, mqttPort: Int, auth: MqttAuthenticator, messageHandler: MqttMessages) {
+    private val broker = Broker(
         enhancedAuthenticationProviders = mapOf(),
         authentication = auth,
         authorization = auth,
         packetInterceptor = messageHandler,
         webSocketPort = wsPort,
-        port = 0,
+        port = mqttPort,
     )
 
     fun start() {
