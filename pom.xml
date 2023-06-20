@@ -10,7 +10,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.8.20</kotlin.version>
+        <kotlin.version>1.8.22</kotlin.version>
+        <kotlin.compiler.jvmTarget>18</kotlin.compiler.jvmTarget>
         <kotlin.code.style>official</kotlin.code.style>
 
         <main.class>com.github.gunnaringe.wg2mqtt.MainKt</main.class>
@@ -189,9 +190,6 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
-                <configuration>
-                    <jvmTarget>18</jvmTarget>
-                </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -231,14 +229,6 @@
                             <mainClass>${main.class}</mainClass>
                         </transformer>
                     </transformers>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
                 </configuration>
             </plugin>
         </plugins>
