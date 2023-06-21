@@ -53,8 +53,9 @@ fun main(args: Array<String>) {
     // Start handlers that sends to WG2
     SmsSender(channel, tokenSource).subscribe()
 
+    val users = Users(config.users)
+
     // Start MQTT server
-    val users = config.users.associate { it.phone to it.password.value }
     val mqttAuth = MqttAuthenticator(users)
     val mqttMessageHandler = MqttMessages()
     val mqttServer = MqttServer(

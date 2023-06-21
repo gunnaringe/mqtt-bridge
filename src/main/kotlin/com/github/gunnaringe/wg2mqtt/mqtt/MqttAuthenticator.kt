@@ -1,12 +1,13 @@
 package com.github.gunnaringe.wg2mqtt.mqtt
 
+import com.github.gunnaringe.wg2mqtt.Users
 import com.github.gunnaringe.wg2mqtt.asString
 import mqtt.broker.interfaces.Authentication
 import mqtt.broker.interfaces.Authorization
 import org.slf4j.LoggerFactory
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class MqttAuthenticator(private val users: Map<String, String>) : Authentication, Authorization {
+class MqttAuthenticator(private val users: Users) : Authentication, Authorization {
 
     /** Add some rate limiting here? */
     override fun authenticate(clientId: String, username: String?, passwordBytes: UByteArray?): Boolean {
@@ -16,7 +17,7 @@ class MqttAuthenticator(private val users: Map<String, String>) : Authentication
             return false
         }
 
-        val isMatchingPassword = users[username] == password
+        val isMatchingPassword = users.check(username, password)
         if (!isMatchingPassword) {
             logger.warn("Authentication failed: $username")
         }
