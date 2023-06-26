@@ -68,6 +68,9 @@ object UserRegistration {
                     Server: mqtts://mqtt.haxxor.xyz
                     
                     Subscribe to topic: +$user/inbox/#
+                    
+                    For more details, see
+                    https://github.com/gunnaringe/wg2-mqtt
                 """.trimIndent(),
             ),
         )
