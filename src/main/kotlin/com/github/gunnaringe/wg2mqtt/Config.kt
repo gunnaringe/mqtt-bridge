@@ -6,6 +6,11 @@ data class Config(
     val wg2: Wg2Config,
     val mqtt: MqttConfig,
     val users: List<User>,
+    val sqlite: SqliteConfig,
+)
+
+data class SqliteConfig(
+    val path: String,
 )
 
 data class Wg2Config(

@@ -6,4 +6,4 @@ import com.google.protobuf.Timestamp
 import java.time.Instant
 
 fun Timestamp.toInstant(): Instant = Instant.ofEpochSecond(seconds, nanos.toLong())
-fun UByteArray.asString(): String = this.toByteArray().toString(Charsets.UTF_8)
+fun UByteArray.asString(): String = this.toByteArray().decodeToString()

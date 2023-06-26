@@ -1,27 +1,24 @@
 package com.github.gunnaringe.wg2mqtt.mqtt
 
-import com.github.gunnaringe.wg2mqtt.Users
 import com.github.gunnaringe.wg2mqtt.asString
+import com.github.gunnaringe.wg2mqtt.users.User
 import mqtt.broker.interfaces.Authentication
 import mqtt.broker.interfaces.Authorization
 import org.slf4j.LoggerFactory
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class MqttAuthenticator(private val users: Users) : Authentication, Authorization {
+class MqttAuthenticator : Authentication, Authorization {
 
     /** Add some rate limiting here? */
-    override fun authenticate(clientId: String, username: String?, passwordBytes: UByteArray?): Boolean {
-        val password = passwordBytes?.asString()
-        if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
+    override fun authenticate(clientId: String, username: String?, password: UByteArray?): Boolean {
+        val passwordString = password?.asString()
+        if (username.isNullOrEmpty() || passwordString.isNullOrEmpty()) {
             logger.warn("Authentication failed: username=$username")
             return false
         }
 
-        val isMatchingPassword = users.check(username, password)
-        if (!isMatchingPassword) {
-            logger.warn("Authentication failed: $username")
-        }
-        return isMatchingPassword
+        val user = User.getAndAuthenticate(username, passwordString)
+        return user != null
     }
 
     override fun authorize(

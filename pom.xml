@@ -21,6 +21,7 @@
         <hoplite.version>2.7.3</hoplite.version>
         <wg2-api-v0.version>0.1.2</wg2-api-v0.version>
         <kmqtt.version>0.4.1</kmqtt.version>
+        <exposed.version>0.41.1</exposed.version>
     </properties>
 
     <dependencies>
@@ -155,6 +156,33 @@
             <version>8.2.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-dao</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-java-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.42.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.75</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -180,6 +208,14 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+            <dependency>
+                <groupId>org.jetbrains.exposed</groupId>
+                <artifactId>exposed-bom</artifactId>
+                <version>${exposed.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -231,6 +267,14 @@
                     </transformers>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -238,6 +282,11 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>mavenCentral</id>
+            <name>mavenCentral</name>
+            <url>https://repo1.maven.org/maven2/</url>
         </repository>
     </repositories>
 </project>

@@ -4,6 +4,8 @@ import com.github.gunnaringe.wg2mqtt.model.asJson
 import com.github.gunnaringe.wg2mqtt.mqtt.MqttAuthenticator
 import com.github.gunnaringe.wg2mqtt.mqtt.MqttMessages
 import com.github.gunnaringe.wg2mqtt.mqtt.MqttServer
+import com.github.gunnaringe.wg2mqtt.users.Database
+import com.github.gunnaringe.wg2mqtt.users.UserRegistration
 import com.github.gunnaringe.wg2mqtt.wg2.ConsentListener
 import com.github.gunnaringe.wg2mqtt.wg2.EventsV0Listener
 import com.github.gunnaringe.wg2mqtt.wg2.OnMessageFromWg2
@@ -32,6 +34,8 @@ fun main(args: Array<String>) {
         .build()
         .loadConfigOrThrow<Config>()
 
+    Database.connect(config.sqlite.path)
+
     val wgtwoAuth = WgtwoAuth.builder(config.wg2.clientId, config.wg2.clientSecret.value).build()
     val tokenSource = wgtwoAuth.clientCredentials.newTokenSource(scope.joinToString(separator = " "))
 
@@ -41,6 +45,9 @@ fun main(args: Array<String>) {
         .keepAliveTimeout(10, TimeUnit.SECONDS)
         .keepAliveWithoutCalls(true)
         .build()
+
+    // Handle user registration on consent added
+    UserRegistration
 
     // Start listening to events from WG2
     val consentListener = ConsentListener(channel, tokenSource, config.wg2.eventQueue).also {
@@ -53,10 +60,8 @@ fun main(args: Array<String>) {
     // Start handlers that sends to WG2
     SmsSender(channel, tokenSource).subscribe()
 
-    val users = Users(config.users)
-
     // Start MQTT server
-    val mqttAuth = MqttAuthenticator(users)
+    val mqttAuth = MqttAuthenticator()
     val mqttMessageHandler = MqttMessages()
     val mqttServer = MqttServer(
         wsPort = config.mqtt.ports.ws,
