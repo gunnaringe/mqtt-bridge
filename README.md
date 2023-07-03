@@ -10,7 +10,9 @@ This is a simple bridge to allow you to use the WG2 APIs over MQTT.
 
 You may connect to this bridge using your phone number without the `+` prefix as your username.
 
-A running version of this bridge is available at `mqtt.haxxor.xyz`.
+Credentials will be sent as a SMS once access is granted.
+
+A running version of this bridge is available at `mqtt-bridge.haxxor.xyz`.
 
 ### Inbox
 All events from WG2 will be posted to `{USERNAME}/inbox/*` topics.
