@@ -27,7 +27,6 @@ The outbox is used to send to the WG2 APIs
 | `{USERNAME}/inbox/call`    | Receive phone call notifications       |
 | `{USERNAME}/inbox/consent` | Receive notification about new consent |
 
-
 ## Usage
 
 > **Note**:
@@ -62,6 +61,29 @@ To send SMS messages, publish to `4799999999/outbox/sms` with the following payl
     "content": "💜"
   }
 }
+```
+
+## Bridge using Mosquitto
+The following example will bridge traffic between a local Mosquitto broker and MQTT Bridge.
+
+Local prefix `wg2/` will be mapped to `{YOUR USERNAME}/` on the server.
+
+```
+listener 1883
+allow_anonymous true
+
+connection wg2
+address mqtt.haxxor.xyz:8883
+cleansession true
+bridge_insecure false
+bridge_capath /etc/ssl/certs/
+remote_username {USERNAME}
+remote_password {YOUR PASSWORD}
+# Disabled as we do not have access to the $SYS tree on the remote broker
+notifications_local_only true
+bridge_protocol_version mqttv50
+try_private true
+topic # both 1 wg2/ {USERNAME}/
 ```
 
 ## Running the server
