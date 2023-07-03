@@ -75,7 +75,7 @@ listener 1883
 allow_anonymous true
 
 connection wg2
-address mqtt.haxxor.xyz:8883
+address mqtt-bridge.haxxor.xyz:8883
 cleansession true
 bridge_insecure false
 bridge_capath /etc/ssl/certs/
