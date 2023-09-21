@@ -1,12 +1,13 @@
 package com.github.gunnaringe.wg2mqtt.model
 
-data class SmsEnvelope(
+data class CallEnvelope(
     override val metadata: Metadata?,
-    val sms: Sms,
+    val call: Call,
 ) : Event
 
-data class Sms(
+data class Call(
     val from: String,
     val to: String,
-    val content: String,
+    val action: String,
+    val hiddenCaller: Boolean,
 )

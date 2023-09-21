@@ -10,18 +10,21 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.8.22</kotlin.version>
-        <kotlin.compiler.jvmTarget>18</kotlin.compiler.jvmTarget>
+        <kotlin.version>1.9.10</kotlin.version>
+        <kotlin.compiler.jvmTarget>20</kotlin.compiler.jvmTarget>
         <kotlin.code.style>official</kotlin.code.style>
 
         <main.class>com.github.gunnaringe.wg2mqtt.MainKt</main.class>
-        <grpc.version>1.53.0</grpc.version>
+        <grpc.version>1.58.0</grpc.version>
         <wg2-api.version>1.10.1</wg2-api.version>
-        <wg2-auth.version>0.0.3</wg2-auth.version>
-        <hoplite.version>2.7.3</hoplite.version>
-        <wg2-api-v0.version>0.1.2</wg2-api-v0.version>
+        <wg2-auth.version>0.0.5</wg2-auth.version>
+        <hoplite.version>2.7.5</hoplite.version>
+        <wg2-api-v0.version>0.1.6</wg2-api-v0.version>
         <kmqtt.version>0.4.1</kmqtt.version>
-        <exposed.version>0.41.1</exposed.version>
+        <exposed.version>0.43.0</exposed.version>
+        <logback.version>1.4.11</logback.version>
+        <bucket4j.version>8.4.0</bucket4j.version>
+        <jackson.version>2.15.2</jackson.version>
     </properties>
 
     <dependencies>
@@ -48,6 +51,11 @@
             <groupId>com.wgtwo.api.v1.grpc</groupId>
             <artifactId>sms</artifactId>
             <version>${wg2-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.wgtwo.api.v0.grpc</groupId>
+            <artifactId>mms</artifactId>
+            <version>${wg2-api-v0.version}</version>
         </dependency>
         <dependency>
             <groupId>com.wgtwo.api.v0.grpc</groupId>
@@ -87,7 +95,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-kotlin</artifactId>
-            <version>3.22.2</version>
+            <version>3.24.3</version>
         </dependency>
 
         <!-- Jackson -->
@@ -116,44 +124,44 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.6</version>
+            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.4.6</version>
+            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>7.3</version>
+            <version>7.4</version>
         </dependency>
 
         <!-- Misc -->
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>libphonenumber</artifactId>
-            <version>8.13.8</version>
+            <version>8.13.21</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.1.5</version>
+            <version>3.1.8</version>
         </dependency>
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>8.2.0</version>
+            <version>${bucket4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-caffeine</artifactId>
-            <version>8.2.0</version>
+            <version>${bucket4j.version}</version>
         </dependency>
 
         <dependency>
@@ -175,12 +183,12 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.42.0.0</version>
+            <version>3.43.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.75</version>
+            <version>1.76</version>
         </dependency>
 
     </dependencies>
@@ -204,7 +212,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.14.2</version>
+                <version>${jackson.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -283,8 +291,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>20</source>
+                    <target>20</target>
                 </configuration>
             </plugin>
         </plugins>

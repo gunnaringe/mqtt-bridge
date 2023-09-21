@@ -21,9 +21,11 @@ import java.util.concurrent.TimeUnit
 private val logger = LoggerFactory.getLogger("com.github.gunnaringe.smschatbot.Main")
 private val scope = setOf(
     "events.sms.subscribe",
-    "sms.text:send_from_subscriber",
     "events.voice.subscribe",
+    "mms.send.from_subscriber",
+    "sms.text:send_from_subscriber",
     "sms.text:send_to_subscriber",
+
 )
 
 fun main(args: Array<String>) {
