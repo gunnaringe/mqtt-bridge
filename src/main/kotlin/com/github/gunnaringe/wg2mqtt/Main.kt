@@ -41,6 +41,8 @@ fun main(args: Array<String>) {
         .loadConfigOrThrow<Config>()
 
     Database.connect(config.sqlite.path)
+    Metrics.registerUserGauge()
+    val metricsServer = Metrics.serve(config.metrics.port)
 
     val wgtwoAuth = WgtwoAuth.builder(config.wg2.clientId, config.wg2.clientSecret.value).build()
     val tokenSource = wgtwoAuth.clientCredentials.newTokenSource(scope.joinToString(separator = " "))
@@ -81,6 +83,7 @@ fun main(args: Array<String>) {
             mqttServer.stop()
             channel.shutdown().awaitTermination(10, TimeUnit.SECONDS)
             Events.close()
+            metricsServer.stop(0)
         },
     )
 
