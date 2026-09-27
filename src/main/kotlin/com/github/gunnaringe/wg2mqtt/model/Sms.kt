@@ -10,3 +10,15 @@ data class Sms(
     val to: String,
     val content: String,
 )
+
+data class CallEnvelope(
+    override val metadata: Metadata?,
+    val call: Call,
+) : Event
+
+data class Call(
+    val from: String,
+    val to: String,
+    val action: String,
+    val hiddenCaller: Boolean,
+)
