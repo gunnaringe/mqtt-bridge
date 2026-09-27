@@ -278,6 +278,8 @@
                                     <mainClass>${main.class}</mainClass>
                                     <manifestEntries>
                                         <Multi-Release>true</Multi-Release>
+                                        <!-- sqlite-jdbc loads a native library; blocked by default in future JDKs -->
+                                        <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
