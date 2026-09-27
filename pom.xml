@@ -20,7 +20,7 @@
         <wg2-auth.version>0.0.3</wg2-auth.version>
         <hoplite.version>2.7.3</hoplite.version>
         <wg2-api-v0.version>0.1.2</wg2-api-v0.version>
-        <kmqtt.version>0.4.1</kmqtt.version>
+        <kmqtt.version>0.4.3</kmqtt.version>
         <exposed.version>0.41.1</exposed.version>
     </properties>
 
@@ -33,12 +33,12 @@
 
         <!-- MQTT -->
         <dependency>
-            <groupId>com.github.davidepianca98.KMQTT</groupId>
+            <groupId>io.github.davidepianca98</groupId>
             <artifactId>kmqtt-broker-jvm</artifactId>
             <version>${kmqtt.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.davidepianca98.KMQTT</groupId>
+            <groupId>io.github.davidepianca98</groupId>
             <artifactId>kmqtt-common-jvm</artifactId>
             <version>${kmqtt.version}</version>
         </dependency>

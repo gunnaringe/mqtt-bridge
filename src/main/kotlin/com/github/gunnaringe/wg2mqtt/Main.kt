@@ -5,6 +5,7 @@ import com.github.gunnaringe.wg2mqtt.mqtt.MqttAuthenticator
 import com.github.gunnaringe.wg2mqtt.mqtt.MqttMessages
 import com.github.gunnaringe.wg2mqtt.mqtt.MqttServer
 import com.github.gunnaringe.wg2mqtt.users.Database
+import com.github.gunnaringe.wg2mqtt.users.User
 import com.github.gunnaringe.wg2mqtt.users.UserRegistration
 import com.github.gunnaringe.wg2mqtt.wg2.ConsentListener
 import com.github.gunnaringe.wg2mqtt.wg2.EventsV0Listener
@@ -27,6 +28,11 @@ private val scope = setOf(
 )
 
 fun main(args: Array<String>) {
+    if (args.firstOrNull() == "set-password") {
+        setPassword(args.drop(1))
+        return
+    }
+
     val config = ConfigLoaderBuilder.default()
         .addDefaultPreprocessors()
         .addEnvironmentSource(useUnderscoresAsSeparator = true, allowUppercaseNames = true)
@@ -39,7 +45,7 @@ fun main(args: Array<String>) {
     val wgtwoAuth = WgtwoAuth.builder(config.wg2.clientId, config.wg2.clientSecret.value).build()
     val tokenSource = wgtwoAuth.clientCredentials.newTokenSource(scope.joinToString(separator = " "))
 
-    val channel = ManagedChannelBuilder.forTarget("api.wgtwo.com:443")
+    val channel = ManagedChannelBuilder.forTarget(config.wg2.apiTarget)
         .useTransportSecurity()
         .keepAliveTime(30, TimeUnit.SECONDS)
         .keepAliveTimeout(10, TimeUnit.SECONDS)
@@ -87,6 +93,21 @@ fun main(args: Array<String>) {
     }
 
     mqttServer.start()
+}
+
+/**
+ * Usage: set-password <sqlite-path> <username>, with the new password on stdin.
+ * Only updates an existing user; users are otherwise created on consent.
+ */
+private fun setPassword(args: List<String>) {
+    require(args.size == 2) { "Usage: set-password <sqlite-path> <username> (password on stdin)" }
+    val (path, username) = args
+    val password = readlnOrNull()?.trim()
+    require(!password.isNullOrEmpty()) { "No password given on stdin" }
+
+    Database.connect(path)
+    check(User.setPassword(username, password)) { "User not found: $username" }
+    println("Password updated for $username")
 }
 
 private fun atShutdown(function: () -> Unit) = Runtime.getRuntime().addShutdownHook(Thread(function))

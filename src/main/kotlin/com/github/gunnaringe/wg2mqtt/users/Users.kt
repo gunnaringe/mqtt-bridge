@@ -50,6 +50,12 @@ class User(id: EntityID<String>) : Entity<String>(id) {
         this@User.password.contentEquals(hash)
     }
 
+    private fun updatePassword(newPassword: String) {
+        val newSalt = Passwords.randomSalt(16)
+        salt = newSalt
+        password = Passwords.hash(newSalt, newPassword)
+    }
+
     fun updateLastLogin() {
         transaction {
             addLogger(Slf4jSqlDebugLogger)
@@ -81,6 +87,12 @@ class User(id: EntityID<String>) : Entity<String>(id) {
                     null
                 }
             }
+        }
+
+        fun setPassword(username: String, password: String): Boolean = transaction {
+            val user = findById(username) ?: return@transaction false
+            user.updatePassword(password)
+            true
         }
 
         fun create(username: String): String {

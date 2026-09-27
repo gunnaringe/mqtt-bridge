@@ -5,7 +5,6 @@ import com.sksamuel.hoplite.Masked
 data class Config(
     val wg2: Wg2Config,
     val mqtt: MqttConfig,
-    val users: List<User>,
     val sqlite: SqliteConfig,
 )
 
@@ -17,6 +16,7 @@ data class Wg2Config(
     val clientId: String,
     val clientSecret: Masked,
     val eventQueue: String?,
+    val apiTarget: String = "api.shamrock.wgtwo.com:443",
 )
 
 data class MqttConfig(
@@ -26,9 +26,4 @@ data class MqttConfig(
 data class MqttPortConfig(
     val ws: Int,
     val mqtt: Int,
-)
-
-data class User(
-    val phone: String,
-    val password: Masked,
 )

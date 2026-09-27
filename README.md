@@ -98,13 +98,12 @@ wg2:
   clientId: "${CLIENT_ID}"
   clientSecret: "${CLIENT_SECRET}"
   eventQueue: "wg2mqtt"
+  # Optional, this is the default
+  apiTarget: "api.shamrock.wgtwo.com:443"
 mqtt:
   ports:
     ws: 9001
     mqtt: 1883
-users:
-  - phone: "${PHONE}"
-    password: "${PASSWORD}"
 sqlite:
   path: "mqttbridge.sqlite"
 EOF
@@ -115,4 +114,13 @@ EOF
 ```shell
 mvn clean package
 java -jar target/wg2mqtt-1.0-SNAPSHOT.jar my-config.yaml
+```
+
+### Reset a user's password
+
+Users are created when they grant consent, and get a random password by SMS.
+To set a new password for an existing user, pass it on stdin:
+
+```shell
+java -jar target/wg2mqtt-1.0-SNAPSHOT.jar set-password mqttbridge.sqlite 4799999999 < new-password.txt
 ```
