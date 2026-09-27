@@ -9,27 +9,25 @@ import com.wgtwo.auth.ClientCredentialSource
 import io.grpc.Channel
 import org.slf4j.LoggerFactory
 
-class SmsSender(private val channel: Channel, private val tokenSource: ClientCredentialSource) {
-
-    fun subscribe() = Unit
+/** Sends SMS posted to the outbox through WG2. */
+class SmsSender(channel: Channel, tokenSource: ClientCredentialSource) {
+    private val stub = SmsServiceGrpc.newBlockingStub(channel)
+        .withCallCredentials(tokenSource.callCredentials())
 
     init {
-        logger.info("Starting SMS sender")
         Events.outbox.register(this)
     }
 
     @Subscribe
     fun onEvent(envelope: SmsEnvelope) {
-        val stub = SmsServiceGrpc.newBlockingStub(channel)
-            .withCallCredentials(tokenSource.callCredentials())
-
-        val request = SendTextFromSubscriberRequest.newBuilder().apply {
-            this.fromSubscriber = envelope.sms.from
-            this.toAddress = envelope.sms.to
-            this.content = envelope.sms.content
-        }.build()
-        logger.info("Sending SMS: $request")
-        stub.sendTextFromSubscriber(request)
+        val request = SendTextFromSubscriberRequest.newBuilder()
+            .setFromSubscriber(envelope.sms.from)
+            .setToAddress(envelope.sms.to)
+            .setContent(envelope.sms.content)
+            .build()
+        logger.info("Sending SMS: from=${request.fromSubscriber} to=${request.toAddress}")
+        val response = stub.sendTextFromSubscriber(request)
+        logger.info("SMS sent: status=${response.status} messageId=${response.messageId}")
     }
 
     companion object {

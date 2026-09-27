@@ -17,106 +17,85 @@ import com.wgtwo.api.v0.events.EventsProto.EventType
 import com.wgtwo.api.v0.events.EventsProto.ManualAckConfig
 import com.wgtwo.api.v0.events.EventsProto.SmsEvent.FromAddressCase
 import com.wgtwo.api.v0.events.EventsProto.SmsEvent.ToAddressCase
-import com.wgtwo.api.v0.events.EventsProto.SubscribeEventsRequest
-import com.wgtwo.api.v0.events.EventsProto.SubscribeEventsResponse
+import com.wgtwo.api.v0.events.EventsProto.VoiceEvent.VoiceEventType
 import com.wgtwo.api.v0.events.EventsServiceGrpc
 import com.wgtwo.auth.ClientCredentialSource
 import io.grpc.Channel
-import io.grpc.Context
 import org.slf4j.LoggerFactory
-import java.io.Closeable
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class EventsV0Listener(
-    private val channel: Channel,
-    private val tokenSource: ClientCredentialSource,
+    channel: Channel,
+    tokenSource: ClientCredentialSource,
     private val eventQueue: String?,
-) : Closeable {
-    private val executor = Executors.newSingleThreadExecutor()
-    private val context = Context.current().withCancellation()
+) : StreamListener("events-v0") {
+    private val stub = EventsServiceGrpc.newBlockingStub(channel)
+        .withCallCredentials(tokenSource.callCredentials())
 
-    fun start() {
-        executor.submit {
-            while (!context.isCancelled) {
-                subscribe()
-                // Wait 10 seconds before reconnecting
-                Thread.sleep(10_000)
-            }
-        }
-    }
-
-    private fun subscribe() {
-        val stub = EventsServiceGrpc.newBlockingStub(channel)
-            .withCallCredentials(tokenSource.callCredentials())
-
-        logger.info("Subscribing to events")
-        val request = SubscribeEventsRequest.newBuilder().apply {
-            this.addType(EventType.SMS_EVENT)
-            this.addType(EventType.VOICE_EVENT)
-            this.startAtOldestPossible = empty {}
+    override fun stream() {
+        val request = EventsProto.SubscribeEventsRequest.newBuilder().apply {
+            addType(EventType.SMS_EVENT)
+            addType(EventType.VOICE_EVENT)
+            startAtOldestPossible = empty {}
             if (eventQueue != null) {
-                this.durableName = eventQueue
-                this.queueName = eventQueue
+                durableName = eventQueue
+                queueName = eventQueue
             }
-            this.manualAck = ManualAckConfig.newBuilder().apply {
-                this.enable = true
-                this.timeout = Duration.newBuilder().setSeconds(60).build()
+            manualAck = ManualAckConfig.newBuilder().apply {
+                enable = true
+                timeout = Duration.newBuilder().setSeconds(60).build()
             }.build()
         }.build()
 
-        try {
-            context.run {
-                stub.subscribe(request).forEach { response: SubscribeEventsResponse ->
-                    logger.debug("Received event: {}", response.event)
-                    val user = response.event.owner.phoneNumber.e164.removePrefix("+")
-                    val event = when (response.event.eventCase) {
-                        EventCase.SMS_EVENT -> createSmsEvent(user, response)
-                        EventCase.VOICE_EVENT -> createVoiceEvent(user, response)
-                        else -> {
-                            logger.warn("Skipping unhandled event type: ${response.event.eventCase}")
-                            null
-                        }
-                    }
-
-                    if (event != null) {
-                        logger.info("Publishing event: $event")
-                        Events.inbox.post(event)
-                    }
-                    ack(response)
+        stub.subscribe(request).forEach { response ->
+            val event = response.event
+            logger.debug("Received event: {}", event)
+            val user = event.owner.phoneNumber.e164.removePrefix("+")
+            val envelope = when (event.eventCase) {
+                EventCase.SMS_EVENT -> toSms(user, event)
+                EventCase.VOICE_EVENT -> toCall(user, event)
+                else -> {
+                    logger.warn("Skipping unhandled event type: ${event.eventCase}")
+                    null
                 }
             }
-        } catch (e: Exception) {
-            logger.error("Error while listening for events", e)
+
+            if (envelope != null) {
+                logger.info("Publishing event: $envelope")
+                Events.inbox.post(envelope)
+            }
+            stub.ack(
+                AckRequest.newBuilder()
+                    .setInbox(event.metadata.ackInbox)
+                    .setSequence(event.metadata.sequence)
+                    .build(),
+            )
         }
     }
 
-    private fun createVoiceEvent(user: String, response: SubscribeEventsResponse): Event {
-        val timestamp = response.event.timestamp.toInstant()
-        val voiceEvent = response.event.voiceEvent
-        val type = voiceEvent.type
-        val from = voiceEvent.fromNumber.e164
-        val to = voiceEvent.toNumber.e164
-        val callerIdHidden = voiceEvent.callerIdHidden
-
-        val action = when (type) {
-            EventsProto.VoiceEvent.VoiceEventType.CALL_INITIATED -> "initiated"
-            EventsProto.VoiceEvent.VoiceEventType.CALL_RINGING -> "ringing"
-            EventsProto.VoiceEvent.VoiceEventType.CALL_ANSWERED -> "answered"
-            EventsProto.VoiceEvent.VoiceEventType.CALL_ENDED -> "ended"
-            EventsProto.VoiceEvent.VoiceEventType.CALL_FWD_VOICEMAIL -> "forwarded to voicemail"
+    private fun toCall(user: String, event: EventsProto.Event): Event {
+        val voiceEvent = event.voiceEvent
+        val action = when (voiceEvent.type) {
+            VoiceEventType.CALL_INITIATED -> "initiated"
+            VoiceEventType.CALL_RINGING -> "ringing"
+            VoiceEventType.CALL_ANSWERED -> "answered"
+            VoiceEventType.CALL_ENDED -> "ended"
+            VoiceEventType.CALL_FWD_VOICEMAIL -> "forwarded to voicemail"
             else -> "unknown"
         }
 
         return CallEnvelope(
-            metadata = Metadata(timestamp, user, "call"),
-            call = Call(from, to, action, callerIdHidden),
+            metadata = Metadata(event.timestamp.toInstant(), user, "call"),
+            call = Call(
+                from = voiceEvent.fromNumber.e164,
+                to = voiceEvent.toNumber.e164,
+                action = action,
+                hiddenCaller = voiceEvent.callerIdHidden,
+            ),
         )
     }
 
-    private fun createSmsEvent(user: String, response: SubscribeEventsResponse): Event? {
-        val timestamp = response.event.timestamp.toInstant()
-        val smsEvent = response.event.smsEvent
+    private fun toSms(user: String, event: EventsProto.Event): Event? {
+        val smsEvent = event.smsEvent
         val from = when (smsEvent.fromAddressCase) {
             FromAddressCase.FROM_E164 -> smsEvent.fromE164.e164
             FromAddressCase.FROM_NATIONAL_PHONE_NUMBER -> smsEvent.fromNationalPhoneNumber.nationalPhoneNumber
@@ -141,37 +120,12 @@ class EventsV0Listener(
         }
 
         return SmsEnvelope(
-            metadata = Metadata(
-                user = user,
-                timestamp = timestamp,
-                type = "sms",
-            ),
-            sms = Sms(
-                from = from,
-                to = to,
-                content = content,
-            ),
+            metadata = Metadata(event.timestamp.toInstant(), user, "sms"),
+            sms = Sms(from = from, to = to, content = content),
         )
-    }
-
-    private fun ack(response: SubscribeEventsResponse) {
-        val request = AckRequest.newBuilder().apply {
-            this.inbox = response.event.metadata.ackInbox
-            this.sequence = response.event.metadata.sequence
-        }.build()
-
-        val stub = EventsServiceGrpc.newBlockingStub(channel)
-            .withCallCredentials(tokenSource.callCredentials())
-        stub.ack(request)
     }
 
     companion object {
         private val logger = LoggerFactory.getLogger(EventsV0Listener::class.java)
-    }
-
-    override fun close() {
-        context.cancel(null)
-        executor.shutdown()
-        executor.awaitTermination(10, TimeUnit.SECONDS)
     }
 }

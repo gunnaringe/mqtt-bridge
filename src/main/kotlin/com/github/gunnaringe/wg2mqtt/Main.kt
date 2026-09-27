@@ -19,7 +19,7 @@ import io.grpc.ManagedChannelBuilder
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-private val logger = LoggerFactory.getLogger("com.github.gunnaringe.smschatbot.Main")
+private val logger = LoggerFactory.getLogger("com.github.gunnaringe.wg2mqtt.Main")
 private val scope = setOf(
     "events.sms.subscribe",
     "sms.text:send_from_subscriber",
@@ -52,45 +52,37 @@ fun main(args: Array<String>) {
         .keepAliveWithoutCalls(true)
         .build()
 
-    // Handle user registration on consent added
-    UserRegistration
+    UserRegistration()
+    SmsSender(channel, tokenSource)
 
-    // Start listening to events from WG2
-    val consentListener = ConsentListener(channel, tokenSource, config.wg2.eventQueue).also {
-        it.start()
-    }
-    val eventsV0Listener = EventsV0Listener(channel, tokenSource, config.wg2.eventQueue).also {
-        it.start()
-    }
-
-    // Start handlers that sends to WG2
-    SmsSender(channel, tokenSource).subscribe()
-
-    // Start MQTT server
-    val mqttAuth = MqttAuthenticator()
-    val mqttMessageHandler = MqttMessages()
     val mqttServer = MqttServer(
         wsPort = config.mqtt.ports.ws,
         mqttPort = config.mqtt.ports.mqtt,
-        auth = mqttAuth,
-        messageHandler = mqttMessageHandler,
+        auth = MqttAuthenticator(),
+        messageHandler = MqttMessages(),
     )
 
-    OnMessageFromWg2 { message ->
-        logger.info("Sending to MQTT: ${message.asJson()}")
-        mqttServer.send(message.createTopic("inbox"), message.asJson())
+    // Forward everything received from WG2 to the user's inbox topics
+    OnMessageFromWg2 { event ->
+        logger.info("Sending to MQTT: ${event.asJson()}")
+        mqttServer.send(event.createTopic("inbox"), event.asJson())
     }
 
-    atShutdown {
-        logger.info("Shutting down...")
-        consentListener.close()
-        eventsV0Listener.close()
-        mqttServer.stop()
-        channel.shutdown()
-        channel.awaitTermination(10, TimeUnit.SECONDS)
-        Events.close()
-        Thread.sleep(10_000)
-    }
+    val listeners = listOf(
+        ConsentListener(channel, tokenSource, config.wg2.eventQueue),
+        EventsV0Listener(channel, tokenSource, config.wg2.eventQueue),
+    )
+    listeners.forEach { it.start() }
+
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            logger.info("Shutting down...")
+            listeners.forEach { it.close() }
+            mqttServer.stop()
+            channel.shutdown().awaitTermination(10, TimeUnit.SECONDS)
+            Events.close()
+        },
+    )
 
     mqttServer.start()
 }
@@ -109,5 +101,3 @@ private fun setPassword(args: List<String>) {
     check(User.setPassword(username, password)) { "User not found: $username" }
     println("Password updated for $username")
 }
-
-private fun atShutdown(function: () -> Unit) = Runtime.getRuntime().addShutdownHook(Thread(function))

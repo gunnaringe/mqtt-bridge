@@ -1,8 +1,8 @@
 package com.github.gunnaringe.wg2mqtt.mqtt
 
-import mqtt.broker.Broker
-import mqtt.packets.Qos
-import mqtt.packets.mqttv5.MQTT5Properties
+import io.github.davidepianca98.mqtt.broker.Broker
+import io.github.davidepianca98.mqtt.packets.Qos
+import io.github.davidepianca98.mqtt.packets.mqttv5.MQTT5Properties
 import org.slf4j.LoggerFactory
 
 class MqttServer(wsPort: Int, mqttPort: Int, auth: MqttAuthenticator, messageHandler: MqttMessages) {
