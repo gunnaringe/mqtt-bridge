@@ -53,7 +53,8 @@ To receive SMS messages, subscribe to `4799999999/inbox/sms` or `4799999999/inbo
 ```
 
 ### Send SMS messages
-To send SMS messages, publish to `4799999999/outbox/sms` with the following payload:
+To send SMS messages, publish to `4799999999/outbox/sms` with the following payload.
+`from` must be your own number:
 
 ```json
 {
@@ -111,10 +112,15 @@ EOF
 
 ### Run
 
+The toolchain (Java 25, Maven) is pinned in `mise.toml`:
+
 ```shell
-mvn clean package
-java -jar target/wg2mqtt-1.0-SNAPSHOT.jar my-config.yaml
+mise install
+mise exec -- mvn package
+mise exec -- java -jar target/wg2mqtt-1.0-SNAPSHOT.jar my-config.yaml
 ```
+
+Or `./run.sh my-config.yaml`, or build the container with `docker build .`.
 
 ### Reset a user's password
 
