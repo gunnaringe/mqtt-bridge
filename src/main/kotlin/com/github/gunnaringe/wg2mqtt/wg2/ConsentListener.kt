@@ -37,6 +37,7 @@ class ConsentListener(
 
         stub.streamConsentChangeEvents(request).forEach { response ->
             val event = toEvent(response)
+            countEvent(event?.consent?.action ?: "ignored")
             if (event != null) {
                 Events.inbox.post(event)
             } else {

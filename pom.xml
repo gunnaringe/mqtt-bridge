@@ -26,6 +26,7 @@
         <kmqtt.version>1.0.0</kmqtt.version>
         <logback.version>1.6.4</logback.version>
         <logstash-encoder.version>8.1</logstash-encoder.version>
+        <micrometer.version>1.17.1</micrometer.version>
         <protobuf.version>4.36.2</protobuf.version>
         <slf4j.version>2.0.20</slf4j.version>
         <sqlite-jdbc.version>3.53.4.0</sqlite-jdbc.version>
@@ -145,6 +146,13 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-encoder.version}</version>
+        </dependency>
+
+        <!-- Metrics -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
         </dependency>
 
         <!-- Database -->

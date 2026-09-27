@@ -59,6 +59,7 @@ class EventsV0Listener(
                 }
             }
 
+            countEvent(envelope?.metadata?.type ?: "ignored")
             if (envelope != null) {
                 logger.info("Publishing event: $envelope")
                 Events.inbox.post(envelope)

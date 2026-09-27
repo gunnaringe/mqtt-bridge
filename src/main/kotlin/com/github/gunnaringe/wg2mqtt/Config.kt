@@ -6,6 +6,11 @@ data class Config(
     val wg2: Wg2Config,
     val mqtt: MqttConfig,
     val sqlite: SqliteConfig,
+    val metrics: MetricsConfig = MetricsConfig(),
+)
+
+data class MetricsConfig(
+    val port: Int = 9090,
 )
 
 data class SqliteConfig(

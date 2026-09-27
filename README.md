@@ -107,6 +107,9 @@ mqtt:
     mqtt: 1883
 sqlite:
   path: "mqttbridge.sqlite"
+# Optional, this is the default
+metrics:
+  port: 9090
 EOF
 ```
 
@@ -121,6 +124,26 @@ mise exec -- java -jar target/wg2mqtt-1.0-SNAPSHOT.jar my-config.yaml
 ```
 
 Or `./run.sh my-config.yaml`, or build the container with `docker build .`.
+
+### Metrics
+
+Prometheus metrics are served on `:9090/metrics` (`metrics.port`):
+
+| Metric                                | Description                                                   |
+|---------------------------------------|---------------------------------------------------------------|
+| `wg2_stream_connected{stream}`        | 1 while the WG2 event stream is subscribed                    |
+| `wg2_stream_errors_total{stream}`     | Stream failures (each is followed by a reconnect)             |
+| `wg2_events_received_total{stream,type}` | Events from WG2, by type (`sms`, `call`, `added`, …, `ignored`) |
+| `wg2_sms_sent_total{result}`          | SMS sent through WG2 (`success`/`failure`)                    |
+| `mqtt_clients_connected`              | Connected MQTT clients                                        |
+| `mqtt_authentications_total{result}`  | MQTT logins (`success`/`failure`)                             |
+| `mqtt_authorizations_denied_total`    | Publish/subscribe attempts outside the user's own topics      |
+| `mqtt_messages_received_total{result}`| Messages from clients (`accepted`/`rejected`/`invalid`)       |
+| `mqtt_messages_published_total`       | Events published to clients                                   |
+| `mqtt_bytes_{received,sent}_total`    | MQTT traffic                                                  |
+| `mqtt_bridge_users`                   | Registered users                                              |
+
+Plus the standard JVM and process metrics.
 
 ### Reset a user's password
 

@@ -3,6 +3,7 @@ package com.github.gunnaringe.wg2mqtt.mqtt
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.gunnaringe.wg2mqtt.Events
+import com.github.gunnaringe.wg2mqtt.Metrics
 import com.github.gunnaringe.wg2mqtt.asString
 import com.github.gunnaringe.wg2mqtt.model.Metadata
 import com.github.gunnaringe.wg2mqtt.model.SmsEnvelope
@@ -28,6 +29,7 @@ class MqttMessages : PacketInterceptor {
             handle(username, payload)
         } catch (e: Exception) {
             logger.warn("Invalid message from $username: $payload", e)
+            received("invalid")
         }
     }
 
@@ -41,16 +43,23 @@ class MqttMessages : PacketInterceptor {
                 // Users may only send from their own number
                 if (envelope.sms.from != "+$username") {
                     logger.warn("Rejecting SMS from ${envelope.sms.from} published by $username")
+                    received("rejected")
                     return
                 }
                 Events.outbox.post(envelope.copy(metadata = metadata.copy(type = "sms")))
+                received("accepted")
             }
 
-            else -> logger.warn("No known type in message: $payload")
+            else -> {
+                logger.warn("No known type in message: $payload")
+                received("invalid")
+            }
         }
     }
 
     companion object {
         private val logger = LoggerFactory.getLogger(MqttMessages::class.java)
+
+        private fun received(result: String) = Metrics.counter("mqtt.messages.received", "result", result).increment()
     }
 }
