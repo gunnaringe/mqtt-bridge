@@ -35,7 +35,7 @@ fun main(args: Array<String>) {
 
     val config = ConfigLoaderBuilder.default()
         .addDefaultPreprocessors()
-        .addEnvironmentSource(useUnderscoresAsSeparator = true, allowUppercaseNames = true)
+        .addEnvironmentSource()
         .apply { args.forEach { file -> addFileSource(file) } }
         .build()
         .loadConfigOrThrow<Config>()
