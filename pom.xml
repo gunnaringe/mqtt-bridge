@@ -21,7 +21,7 @@
         <exposed.version>1.5.0</exposed.version>
         <grpc.version>1.84.0</grpc.version>
         <guava.version>33.7.1-jre</guava.version>
-        <hoplite.version>2.9.0</hoplite.version>
+        <hoplite.version>3.0.5</hoplite.version>
         <jackson.version>2.22.3</jackson.version>
         <kmqtt.version>1.0.0</kmqtt.version>
         <logback.version>1.6.4</logback.version>
