@@ -1,6 +1,6 @@
 # The jar is platform-independent, so build it once on the native platform
 # instead of under QEMU for every target architecture.
-FROM --platform=$BUILDPLATFORM docker.io/library/maven:3.9.16-eclipse-temurin-25 AS build
+FROM --platform=$BUILDPLATFORM docker.io/library/maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /build
 COPY pom.xml ./
 COPY src ./src
