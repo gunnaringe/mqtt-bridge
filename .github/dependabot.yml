@@ -28,6 +28,13 @@ updates:
     groups:
       docker-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # The build image follows the Java and Maven pinned in mise.toml (Java 25
+      # LTS); Dependabot otherwise proposes non-LTS JDKs via the tag suffix.
+      - dependency-name: library/maven
+      # Runtime JRE: stay on the LTS major, take its patch updates.
+      - dependency-name: library/eclipse-temurin
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
